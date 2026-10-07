@@ -1,0 +1,225 @@
+### ============================================================
+### RemoteFlow API - test requests (IntelliJ HTTP Client)
+### Esegui ogni richiesta con il pulsante verde accanto al metodo.
+### Esegui prima la sezione JOBS: salva jobId per le richieste APPLICATIONS.
+### ============================================================
+
+@baseUrl = http://localhost:8080
+
+
+### ------------------------------------------------------------
+### JOBS
+### ------------------------------------------------------------
+
+### Crea un job (salva l'id in {{jobId}})
+POST {{baseUrl}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "Backend Java Developer",
+  "company": "Umbrella",
+  "location": "Remote",
+  "salaryMin": 37000,
+  "salaryMax": 50000,
+  "remoteFromItaly": true
+}
+
+> {%
+    client.global.set("jobId", response.body.id);
+    client.test("Job creato (201)", function () {
+        client.assert(response.status === 201, "Atteso 201, ricevuto " + response.status);
+    });
+%}
+
+
+### Crea un secondo job (non remoto, stipendio piu' alto)
+POST {{baseUrl}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "Spring Boot Engineer",
+  "company": "Globex",
+  "location": "Milano",
+  "salaryMin": 45000,
+  "salaryMax": 60000,
+  "remoteFromItaly": false
+}
+
+> {%
+    client.global.set("jobId2", response.body.id);
+%}
+
+
+### Lista di tutti i job
+GET {{baseUrl}}/api/jobs
+
+
+### Job per id
+GET {{baseUrl}}/api/jobs/{{jobId}}
+
+
+### Filtro: solo remoti dall'Italia
+GET {{baseUrl}}/api/jobs?remoteFromItaly=true
+
+
+### Filtro: stipendio minimo >= 40000
+GET {{baseUrl}}/api/jobs?salaryMin=40000
+
+
+### Filtro combinato: remoti E stipendio minimo >= 30000
+GET {{baseUrl}}/api/jobs?remoteFromItaly=true&salaryMin=30000
+
+
+### Aggiorna un job
+PUT {{baseUrl}}/api/jobs/{{jobId}}
+Content-Type: application/json
+
+{
+  "title": "Senior Backend Java Developer",
+  "company": "Acme",
+  "location": "Remote",
+  "salaryMin": 40000,
+  "salaryMax": 55000,
+  "remoteFromItaly": true
+}
+
+
+### [ERRORE ATTESO 400] Titolo vuoto e range stipendio non valido
+POST {{baseUrl}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "",
+  "company": "Acme",
+  "salaryMin": 50000,
+  "salaryMax": 30000,
+  "remoteFromItaly": true
+}
+
+> {%
+    client.test("Validazione fallisce (400)", function () {
+        client.assert(response.status === 400, "Atteso 400, ricevuto " + response.status);
+    });
+%}
+
+
+### [ERRORE ATTESO 400] remoteFromItaly mancante
+POST {{baseUrl}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "Dev",
+  "company": "Acme"
+}
+
+
+### [ERRORE ATTESO 404] Job inesistente
+GET {{baseUrl}}/api/jobs/999999
+
+
+### ------------------------------------------------------------
+### APPLICATIONS
+### ------------------------------------------------------------
+
+### Crea una candidatura (salva l'id in {{applicationId}})
+POST {{baseUrl}}/api/applications
+Content-Type: application/json
+
+{
+  "jobId": {{jobId}},
+  "status": "APPLIED",
+  "appliedAt": "2026-10-07"
+}
+
+> {%
+    client.global.set("applicationId", response.body.id);
+    client.test("Candidatura creata (201)", function () {
+        client.assert(response.status === 201, "Atteso 201, ricevuto " + response.status);
+    });
+%}
+
+
+### Lista di tutte le candidature
+GET {{baseUrl}}/api/applications
+
+
+### Candidatura per id
+GET {{baseUrl}}/api/applications/{{applicationId}}
+
+
+### Aggiorna lo stato della candidatura
+PUT {{baseUrl}}/api/applications/{{applicationId}}
+Content-Type: application/json
+
+{
+  "jobId": {{jobId}},
+  "status": "INTERVIEW",
+  "appliedAt": "2026-10-07"
+}
+
+
+### [ERRORE ATTESO 409] Candidatura duplicata per lo stesso job
+POST {{baseUrl}}/api/applications
+Content-Type: application/json
+
+{
+  "jobId": {{jobId}},
+  "status": "APPLIED",
+  "appliedAt": "2026-10-07"
+}
+
+> {%
+    client.test("Duplicato rifiutato (409)", function () {
+        client.assert(response.status === 409, "Atteso 409, ricevuto " + response.status);
+    });
+%}
+
+
+### [ERRORE ATTESO 404] Candidatura per un job inesistente
+POST {{baseUrl}}/api/applications
+Content-Type: application/json
+
+{
+  "jobId": 999999,
+  "status": "APPLIED",
+  "appliedAt": "2026-10-07"
+}
+
+
+### [ERRORE ATTESO 400] jobId e status mancanti
+POST {{baseUrl}}/api/applications
+Content-Type: application/json
+
+{
+  "appliedAt": "2026-10-07"
+}
+
+
+### [ERRORE ATTESO 400] Valore di status non valido
+POST {{baseUrl}}/api/applications
+Content-Type: application/json
+
+{
+  "jobId": {{jobId2}},
+  "status": "PIPPO",
+  "appliedAt": "2026-10-07"
+}
+
+
+### [ERRORE ATTESO 404] Candidatura inesistente
+GET {{baseUrl}}/api/applications/999999
+
+
+### ------------------------------------------------------------
+### CLEANUP
+### ------------------------------------------------------------
+
+### Elimina la candidatura (204)
+DELETE {{baseUrl}}/api/applications/{{applicationId}}
+
+
+### Elimina i job (204)
+DELETE {{baseUrl}}/api/jobs/{{jobId}}
+
+###
+DELETE {{baseUrl}}/api/jobs/{{jobId2}}
