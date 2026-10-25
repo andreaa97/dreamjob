@@ -25,6 +25,7 @@
   </div>
 }
 
+<!-- Riepilogo per stato: ogni pulsante filtra la tabella (aria-pressed indica quello attivo) -->
 <div class="pipeline" role="group" aria-label="Filtra per stato">
   @for (status of statuses; track status) {
     <button
@@ -40,6 +41,8 @@
   }
 </div>
 
+<!-- Tabella: errore, caricamento, nessuna candidatura, filtro senza risultati, oppure le righe.
+     Su schermi stretti il CSS trasforma ogni riga in una scheda. -->
 @if (loadError(); as error) {
   <div class="alert alert--error" role="alert">
     <span>{{ error }}</span>

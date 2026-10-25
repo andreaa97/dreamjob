@@ -1,14 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
 /**
- * Turns an HTTP error from the backend into a message for the user.
- * `conflictMessage` explains the 409 in the context of the action that caused it.
+ * Trasforma un errore HTTP del backend in un messaggio comprensibile per l'utente.
+ * `conflictMessage` spiega il 409 nel contesto dell'azione che l'ha causato
+ * (es. "Hai già una candidatura per questo annuncio.").
  */
 export function apiErrorMessage(
   error: unknown,
   conflictMessage = "L'operazione è in conflitto con i dati esistenti.",
 ): string {
-  // resources may wrap the original error in Error.cause
+  // le resource di Angular possono avvolgere l'errore originale in Error.cause
   const cause = error instanceof Error && error.cause !== undefined ? error.cause : error;
   const response = error instanceof HttpErrorResponse ? error : cause;
 
@@ -17,16 +18,16 @@ export function apiErrorMessage(
   }
 
   switch (response.status) {
-    case 0: // network error
-    case 502: // the dev-server proxy answers 502 when the backend is down
+    case 0: // errore di rete: nessuna risposta dal server
+    case 502: // il proxy di sviluppo risponde 502 quando il backend è spento
     case 503:
     case 504:
       return 'Impossibile contattare il server: controlla di essere online e che il backend sia avviato.';
-    case 400:
+    case 400: // validazione fallita (@Valid nel backend)
       return 'Dati non validi: controlla i campi e riprova.';
-    case 404:
+    case 404: // l'elemento è stato eliminato nel frattempo (es. da un'altra scheda)
       return "L'elemento non esiste più: forse è stato eliminato. Aggiorna la pagina.";
-    case 409:
+    case 409: // regola di business violata: il chiamante sa spiegare quale
       return conflictMessage;
     default:
       return response.status >= 500

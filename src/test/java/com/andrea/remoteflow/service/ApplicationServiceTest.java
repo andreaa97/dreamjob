@@ -27,6 +27,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test della logica di business di {@link ApplicationService}, senza Spring:
+ * i repository sono mock di Mockito e {@code @InjectMocks} li passa al service.
+ * Si verificano le regole (job inesistente, candidatura duplicata...) e le chiamate ai repository.
+ */
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
 

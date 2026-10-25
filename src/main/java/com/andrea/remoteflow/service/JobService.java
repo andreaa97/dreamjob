@@ -11,10 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Logica di business dei job (annunci di lavoro): creazione, modifica, ricerca con filtri
+ * ed eliminazione. La validazione dei dati e' gia' avvenuta nel controller ({@code @Valid}).
+ */
 @Service
 public class JobService {
 
     private final JobRepository jobRepository;
+    // serve solo per sapere se un job ha candidature prima di eliminarlo
     private final ApplicationRepository applicationRepository;
 
     public JobService(JobRepository jobRepository,
@@ -23,6 +28,7 @@ public class JobService {
         this.applicationRepository = applicationRepository;
     }
 
+    /** Crea un job e lo restituisce con l'id assegnato dal database. */
     @Transactional
     public Job createJob(JobRequest request) {
         Job job = new Job(
@@ -36,6 +42,11 @@ public class JobService {
         return jobRepository.save(job);
     }
 
+    /**
+     * Sostituisce tutti i campi di un job.
+     *
+     * @throws JobNotFoundException se il job non esiste (404)
+     */
     @Transactional
     public Job updateJob(Long id, JobRequest request) {
         Job job = getJobById(id);
@@ -47,20 +58,33 @@ public class JobService {
         job.setSalaryMax(request.salaryMax());
         job.setRemoteFromItaly(request.remoteFromItaly());
 
-        return job; // managed entity, saved on commit
+        // nessun save(): entita' gestita, Hibernate scrive le modifiche al commit
+        return job;
     }
 
+    /**
+     * Un job per id.
+     *
+     * @throws JobNotFoundException se non esiste (404)
+     */
     @Transactional(readOnly = true)
     public Job getJobById(Long id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new JobNotFoundException(id));
     }
 
+    /**
+     * Elimina un job che non ha candidature.
+     *
+     * @throws JobNotFoundException        se il job non esiste (404)
+     * @throws JobHasApplicationException  se ha una candidatura (409)
+     */
     @Transactional
     public void deleteJob(Long id) {
         Job job = getJobById(id);
 
-        // applications.job_id references the job: deleting it would violate the foreign key
+        // applications.job_id punta al job: eliminarlo violerebbe la foreign key (errore 500).
+        // Lo controlliamo prima per rispondere con un 409 e un messaggio chiaro.
         if (applicationRepository.existsByJobId(id)) {
             throw new JobHasApplicationException(id);
         }
@@ -68,6 +92,12 @@ public class JobService {
         jobRepository.delete(job);
     }
 
+    /**
+     * Cerca i job con filtri facoltativi: un parametro {@code null} significa "qualsiasi".
+     *
+     * @param remoteFromItaly se valorizzato, solo i job remoti (true) o non remoti (false)
+     * @param salaryMin       se valorizzato, solo i job con stipendio minimo maggiore o uguale
+     */
     @Transactional(readOnly = true)
     public List<Job> search(Boolean remoteFromItaly, Long salaryMin) {
         if (remoteFromItaly != null && salaryMin != null)

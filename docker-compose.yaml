@@ -1,19 +1,26 @@
+# Database PostgreSQL per lo sviluppo locale.
+# Avvio: docker compose up -d    Stop: docker compose down    (down -v cancella anche i dati)
 services:
   postgres:
     image: postgres:18
     container_name: remote_job_container
 
+    # database, utente e password creati al primo avvio
+    # (devono coincidere con spring.datasource.* in application.properties)
     environment:
       POSTGRES_DB: portfolio
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: portfolio
 
+    # porta 5433 sul computer -> 5432 nel container (evita conflitti con un PostgreSQL locale)
     ports:
       - "5433:5432"
 
+    # volume con nome: i dati restano anche se il container viene ricreato
     volumes:
       - pgdata:/var/lib/postgresql
 
+    # controlla ogni 5s che PostgreSQL accetti connessioni: il container diventa "healthy"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d portfolio"]
       interval: 5s

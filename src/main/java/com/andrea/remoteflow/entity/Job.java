@@ -5,12 +5,19 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Annuncio di lavoro: tabella {@code jobs} (creata dalla migrazione V1).
+ * <p>
+ * I nomi dei campi in camelCase corrispondono alle colonne in snake_case
+ * (es. {@code salaryMin} -> {@code salary_min}) grazie alla naming strategy di Spring.
+ */
 @Entity
 @Table(name = "jobs")
 @Getter
 @Setter
 public class Job {
 
+    // generato dal database: nessun setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
@@ -22,15 +29,18 @@ public class Job {
 
     private String location;
 
+    // stipendio annuo in euro; null se l'annuncio non lo indica
     private Long salaryMin;
 
     private Long salaryMax;
 
     private Boolean remoteFromItaly;
 
+    // costruttore vuoto richiesto da JPA
     public Job() {
     }
 
+    // usato dal service per creare un nuovo job (l'id lo assegna il database)
     public Job(
             String title,
             String company,

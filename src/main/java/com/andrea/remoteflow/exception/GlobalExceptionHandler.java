@@ -8,12 +8,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
 
+/**
+ * Gestione centralizzata delle eccezioni che non hanno gia' un {@code @ResponseStatus}.
+ * {@code @RestControllerAdvice} applica questi handler a tutti i controller.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // A database constraint was violated (e.g. two requests for the same job passing the
-    // service check at the same time, then hitting uq_applications_job): 409, not 500.
-    // sendError keeps the same error body as the @ResponseStatus exceptions.
+    /**
+     * Il database ha rifiutato un'operazione per un vincolo violato. Succede, per esempio,
+     * quando due richieste per lo stesso job superano insieme il controllo nel service e la
+     * seconda viene bloccata da {@code uq_applications_job}: rispondiamo 409 invece di 500.
+     * {@code sendError} produce lo stesso corpo JSON delle eccezioni con {@code @ResponseStatus}.
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public void handleDataIntegrityViolation(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.CONFLICT.value());

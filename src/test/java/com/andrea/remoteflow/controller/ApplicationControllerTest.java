@@ -27,6 +27,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Test del solo strato web: {@code @WebMvcTest} avvia controller, validazione, conversione JSON
+ * e gestione degli errori, ma non service e database. Il service e' sostituito da un mock
+ * ({@code @MockitoBean}), cosi' si controllano URL, codici HTTP e forma delle risposte.
+ */
 @WebMvcTest(ApplicationController.class)
 class ApplicationControllerTest {
 

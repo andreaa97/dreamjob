@@ -1,3 +1,4 @@
+<!-- Intestazione: il pulsante "Nuovo annuncio" sparisce mentre il form è aperto -->
 <header class="page-header">
   <div>
     <h1>Annunci</h1>
@@ -8,6 +9,7 @@
   }
 </header>
 
+<!-- Esito dell'ultima operazione; role="alert" fa leggere subito gli errori agli screen reader -->
 @if (message(); as m) {
   <div
     class="alert"
@@ -27,6 +29,7 @@
   </div>
 }
 
+<!-- Form di creazione/modifica: visibile solo quando editing() non è null -->
 @if (editing(); as current) {
   <app-job-form
     [job]="current === 'new' ? null : current"
@@ -36,6 +39,8 @@
   />
 }
 
+<!-- Filtri: ogni modifica aggiorna il signal filters() e rxResource rifà la richiesta.
+     Il campo stipendio usa (change), che scatta a fine modifica e non a ogni tasto. -->
 <div class="card toolbar" role="search" aria-label="Filtra gli annunci">
   <label class="field">
     <span class="field__label">Modalità di lavoro</span>
@@ -74,6 +79,7 @@
   }
 </div>
 
+<!-- Lista: errore di caricamento, caricamento in corso, nessun risultato, oppure le card -->
 @if (loadError(); as error) {
   <div class="alert alert--error" role="alert">
     <span>{{ error }}</span>
