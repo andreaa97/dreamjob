@@ -2,6 +2,7 @@
 ### RemoteFlow API - test requests (IntelliJ HTTP Client)
 ### Esegui ogni richiesta con il pulsante verde accanto al metodo.
 ### Esegui prima la sezione JOBS: salva jobId per le richieste APPLICATIONS.
+### Per avere subito 12 job e 6 candidature di prova: db/dati-di-test.sql
 ### ============================================================
 
 @baseUrl = http://localhost:8080
