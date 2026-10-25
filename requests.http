@@ -210,6 +210,16 @@ Content-Type: application/json
 GET {{baseUrl}}/api/applications/999999
 
 
+### [ERRORE ATTESO 409] Eliminare un job che ha una candidatura
+DELETE {{baseUrl}}/api/jobs/{{jobId}}
+
+> {%
+    client.test("Job con candidatura non eliminabile (409)", function () {
+        client.assert(response.status === 409, "Atteso 409, ricevuto " + response.status);
+    });
+%}
+
+
 ### ------------------------------------------------------------
 ### CLEANUP
 ### ------------------------------------------------------------

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -105,8 +106,8 @@ class ApplicationControllerTest {
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.status").value("APPLIED"))
                 .andExpect(jsonPath("$.appliedAt").value("2026-10-07"))
-                .andExpect(jsonPath("$.job.id").value(1))
-                .andExpect(jsonPath("$.job.title").value("Backend Developer"));
+                .andExpect(jsonPath("$.jobId").value(1))
+                .andExpect(jsonPath("$.jobTitle").value("Backend Developer"));
 
 
         verify(applicationService)
@@ -172,7 +173,7 @@ class ApplicationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.status").value("INTERVIEW"))
-                .andExpect(jsonPath("$.job.id").value(1));
+                .andExpect(jsonPath("$.jobId").value(1));
 
 
         verify(applicationService).getApplicationById(10L);
@@ -211,7 +212,7 @@ class ApplicationControllerTest {
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.status").value("INTERVIEW"))
                 .andExpect(jsonPath("$.appliedAt").value("2026-10-08"))
-                .andExpect(jsonPath("$.job.id").value(1));
+                .andExpect(jsonPath("$.jobId").value(1));
 
 
         verify(applicationService)
@@ -300,5 +301,30 @@ class ApplicationControllerTest {
 
 
         verify(applicationService).getApplicationById(99L);
+    }
+
+
+    @Test
+    @DisplayName("POST restituisce 409 se il database rifiuta la candidatura (vincolo violato)")
+    void createApplicationConstraintViolation() throws Exception {
+
+        // es. due richieste per lo stesso job arrivate insieme: il controllo nel service
+        // passa per entrambe, ma il vincolo uq_applications_job blocca la seconda
+        when(applicationService.createApplication(any(ApplicationRequest.class)))
+                .thenThrow(new DataIntegrityViolationException("uq_applications_job"));
+
+
+        mockMvc.perform(
+                        post("/api/applications")
+                                .contentType("application/json")
+                                .content("""
+                                        {
+                                          "jobId": 1,
+                                          "status": "APPLIED",
+                                          "appliedAt": "2026-10-07"
+                                        }
+                                        """)
+                )
+                .andExpect(status().isConflict());
     }
 }

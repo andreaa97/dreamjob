@@ -60,11 +60,7 @@ class ApplicationServiceTest {
     }
 
     private ApplicationRequest request(Long jobId, ApplicationStatus status, LocalDate appliedAt) {
-        ApplicationRequest request = new ApplicationRequest();
-        request.setJobId(jobId);
-        request.setStatus(status);
-        request.setAppliedAt(appliedAt);
-        return request;
+        return new ApplicationRequest(jobId, status, appliedAt);
     }
 
     // ============================================================

@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -26,6 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * Le proprieta' del datasource sono sovrascritte qui, quindi il test NON tocca
  * il database configurato in application.properties.
+ *
+ * Lo schema lo crea Flyway con le stesse migrazioni di produzione (db/migration);
+ * Hibernate si limita a verificare (validate) che le entita' corrispondano alle tabelle.
  */
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:remoteflow-test;DB_CLOSE_DELAY=-1",
@@ -33,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.password=",
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+        "spring.jpa.hibernate.ddl-auto=validate"
 })
 @AutoConfigureMockMvc
 class ApplicationIntegrationTest {
@@ -218,6 +223,30 @@ class ApplicationIntegrationTest {
     }
 
     @Test
+    @DisplayName("eliminare un job con una candidatura restituisce 409 e non elimina nulla")
+    void deleteJobWithApplicationReturnsConflict() throws Exception {
+        long jobId = createJob("Backend Java Developer", 35000, 50000, true);
+        createApplication(jobId, "APPLIED");
+
+        mockMvc.perform(delete("/api/jobs/{id}", jobId))
+                .andExpect(status().isConflict());
+
+        assertEquals(1, jobRepository.count());
+        assertEquals(1, applicationRepository.count());
+    }
+
+    @Test
+    @DisplayName("eliminare un job senza candidature restituisce 204")
+    void deleteJobWithoutApplicationReturnsNoContent() throws Exception {
+        long jobId = createJob("Backend Java Developer", 35000, 50000, true);
+
+        mockMvc.perform(delete("/api/jobs/{id}", jobId))
+                .andExpect(status().isNoContent());
+
+        assertEquals(0, jobRepository.count());
+    }
+
+    @Test
     @DisplayName("candidatura per un job inesistente restituisce 404")
     void applicationForMissingJobReturnsNotFound() throws Exception {
         mockMvc.perform(post("/api/applications")
@@ -277,6 +306,36 @@ class ApplicationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jobJson("Dev", 50000, 30000, true)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("aggiornare un job con titolo vuoto restituisce 400 e non modifica il job")
+    void updateJobWithBlankTitleReturnsBadRequest() throws Exception {
+        long jobId = createJob("Backend Java Developer", 35000, 50000, true);
+
+        mockMvc.perform(put("/api/jobs/{id}", jobId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jobJson("", 35000, 50000, true)))
+                .andExpect(status().isBadRequest());
+
+        assertEquals("Backend Java Developer", jobRepository.findById(jobId).orElseThrow().getTitle());
+    }
+
+    // ============================================================
+    // Caricamento del job insieme alla candidatura
+    // ============================================================
+
+    @Test
+    @DisplayName("findAll carica anche il job, senza query extra ne' lazy loading fuori transazione")
+    void findAllFetchesJob() throws Exception {
+        long jobId = createJob("Backend Java Developer", 35000, 50000, true);
+        createApplication(jobId, "APPLIED");
+
+        // siamo fuori da una transazione: se il job non fosse gia' caricato,
+        // getTitle() lancerebbe LazyInitializationException
+        List<Application> applications = applicationRepository.findAll();
+
+        assertEquals("Backend Java Developer", applications.getFirst().getJob().getTitle());
     }
 
     // ============================================================

@@ -1,40 +1,31 @@
 package com.andrea.remoteflow.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "jobs")
+@Getter
+@Setter
 public class Job {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Getter
-    @Setter
     private String title;
 
-    @Getter
-    @Setter
     private String company;
 
-    @Getter
-    @Setter
     private String location;
 
-    @Getter
-    @Setter
     private Long salaryMin;
 
-    @Getter
-    @Setter
     private Long salaryMax;
 
-    @Getter
-    @Setter
     private Boolean remoteFromItaly;
 
     public Job() {
@@ -47,7 +38,6 @@ public class Job {
             Long salaryMin,
             Long salaryMax,
             Boolean remoteFromItaly
-
     ) {
         this.title = title;
         this.company = company;
@@ -55,7 +45,6 @@ public class Job {
         this.salaryMin = salaryMin;
         this.salaryMax = salaryMax;
         this.remoteFromItaly = remoteFromItaly;
-
     }
 
 }

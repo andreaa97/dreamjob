@@ -37,11 +37,9 @@ public class JobController {
     }
 
     @PutMapping("/{id}")
-    public Job updateJob(
-            @PathVariable Long id,
-            @RequestBody JobRequest job
-    ) {
-        return jobService.updateJob(id, job);
+    public Job updateJob(@PathVariable Long id,
+                         @Valid @RequestBody JobRequest request) {
+        return jobService.updateJob(id, request);
     }
 
     @DeleteMapping("/{id}")
@@ -49,19 +47,4 @@ public class JobController {
     public void deleteJob(@PathVariable Long id) {
         jobService.deleteJob(id);
     }
-
-    /*@GetMapping
-    public List<Job> checkItaly(@RequestParam Boolean remoteFromItaly) {
-        return jobService.remote(remoteFromItaly);
-
-        for (Job value : jobsFromItaly) {
-            if (!value.isRemoteFromItaly()) {
-                jobsFromItaly.remove(value);
-            }
-        } mia soluzione
-        //jobsFromItaly.removeIf(value -> !value.isRemoteFromItaly());
-
-        //jobsFromItaly.removeIf(Job::isRemoteFromItaly); unica riga con lambda
-    }*/
-
 }

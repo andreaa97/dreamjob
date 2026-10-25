@@ -27,8 +27,8 @@ public class ApplicationService {
 
     @Transactional
     public Application createApplication(ApplicationRequest request) {
-        Job job = jobRepository.findById(request.getJobId())
-                .orElseThrow(() -> new JobNotFoundException(request.getJobId()));
+        Job job = jobRepository.findById(request.jobId())
+                .orElseThrow(() -> new JobNotFoundException(request.jobId()));
 
         if (applicationRepository.existsByJobId(job.getId())) {
             throw new DuplicateApplicationException(job.getId());
@@ -36,8 +36,8 @@ public class ApplicationService {
 
         Application application = new Application();
         application.setJob(job);
-        application.setStatus(request.getStatus());
-        application.setAppliedAt(request.getAppliedAt());
+        application.setStatus(request.status());
+        application.setAppliedAt(request.appliedAt());
         return applicationRepository.save(application);
     }
 
@@ -57,17 +57,17 @@ public class ApplicationService {
         Application application = getApplicationById(id);
 
         // only re-check the duplicate rule if the job is actually changing
-        if (!application.getJob().getId().equals(request.getJobId())) {
-            Job job = jobRepository.findById(request.getJobId())
-                    .orElseThrow(() -> new JobNotFoundException(request.getJobId()));
+        if (!application.getJob().getId().equals(request.jobId())) {
+            Job job = jobRepository.findById(request.jobId())
+                    .orElseThrow(() -> new JobNotFoundException(request.jobId()));
             if (applicationRepository.existsByJobId(job.getId())) {
                 throw new DuplicateApplicationException(job.getId());
             }
             application.setJob(job);
         }
 
-        application.setStatus(request.getStatus());
-        application.setAppliedAt(request.getAppliedAt());
+        application.setStatus(request.status());
+        application.setAppliedAt(request.appliedAt());
         return application; // managed entity, saved on commit
     }
 
