@@ -1,0 +1,160 @@
+<header class="page-header">
+  <div>
+    <h1>Annunci</h1>
+    <p class="muted">Le offerte di lavoro che stai seguendo.</p>
+  </div>
+  @if (editing() === null) {
+    <button type="button" class="btn btn--primary" (click)="openNew()">+ Nuovo annuncio</button>
+  }
+</header>
+
+@if (message(); as m) {
+  <div
+    class="alert"
+    [class.alert--error]="m.kind === 'error'"
+    [class.alert--success]="m.kind === 'success'"
+    [attr.role]="m.kind === 'error' ? 'alert' : 'status'"
+  >
+    <span>{{ m.text }}</span>
+    <button
+      type="button"
+      class="alert__close"
+      aria-label="Chiudi messaggio"
+      (click)="message.set(null)"
+    >
+      ×
+    </button>
+  </div>
+}
+
+@if (editing(); as current) {
+  <app-job-form
+    [job]="current === 'new' ? null : current"
+    [saving]="saving()"
+    (save)="save($event)"
+    (cancelled)="closeForm()"
+  />
+}
+
+<div class="card toolbar" role="search" aria-label="Filtra gli annunci">
+  <label class="field">
+    <span class="field__label">Modalità di lavoro</span>
+    <select #remote (change)="setRemoteFilter(remote.value)">
+      <option value="" [selected]="filters().remoteFromItaly === null">Tutti</option>
+      <option value="true" [selected]="filters().remoteFromItaly === true">
+        Remote dall'Italia
+      </option>
+      <option value="false" [selected]="filters().remoteFromItaly === false">Non remote</option>
+    </select>
+  </label>
+
+  <label class="field">
+    <span class="field__label">Stipendio minimo almeno (€)</span>
+    <input
+      #salary
+      type="number"
+      min="0"
+      step="1000"
+      placeholder="es. 40000"
+      [value]="filters().salaryMin ?? ''"
+      (change)="setSalaryFilter(salary.value)"
+    />
+  </label>
+
+  @if (filtersActive()) {
+    <button type="button" class="btn btn--ghost btn--sm" (click)="resetFilters()">
+      Azzera filtri
+    </button>
+  }
+
+  @if (jobs.hasValue() && !loadError()) {
+    <span class="toolbar__count muted" aria-live="polite">
+      {{ rows().length }} {{ rows().length === 1 ? 'annuncio' : 'annunci' }}
+    </span>
+  }
+</div>
+
+@if (loadError(); as error) {
+  <div class="alert alert--error" role="alert">
+    <span>{{ error }}</span>
+    <button type="button" class="btn btn--ghost btn--sm" (click)="jobs.reload()">Riprova</button>
+  </div>
+} @else if (jobs.isLoading() && rows().length === 0) {
+  <p class="muted" role="status">Caricamento annunci…</p>
+} @else if (rows().length === 0) {
+  <div class="card empty">
+    @if (filtersActive()) {
+      <p>Nessun annuncio corrisponde ai filtri.</p>
+      <button type="button" class="btn btn--ghost" (click)="resetFilters()">Azzera filtri</button>
+    } @else {
+      <p>Non hai ancora salvato nessun annuncio.</p>
+      @if (editing() === null) {
+        <button type="button" class="btn btn--primary" (click)="openNew()">
+          Aggiungi il primo
+        </button>
+      }
+    }
+  </div>
+} @else {
+  <ul class="job-grid" [attr.aria-busy]="jobs.isLoading()">
+    @for (row of rows(); track row.job.id) {
+      <li class="card job">
+        <div class="job__head">
+          <h2 class="job__title">{{ row.job.title }}</h2>
+          @if (row.job.remoteFromItaly) {
+            <span class="badge badge--remote">Remote dall'Italia</span>
+          }
+        </div>
+        <p class="job__company">
+          {{ row.job.company }}
+          @if (row.job.location) {
+            <span class="muted">· {{ row.job.location }}</span>
+          }
+        </p>
+        <p class="job__salary">{{ row.salary }}</p>
+
+        <div class="job__actions">
+          @if (row.application; as application) {
+            <a
+              class="status"
+              routerLink="/candidature"
+              [attr.data-status]="application.status"
+              [attr.aria-label]="
+                'Candidatura: ' + statusLabels[application.status] + '. Apri le candidature'
+              "
+            >
+              {{ statusLabels[application.status] }}
+            </a>
+          } @else {
+            <button
+              type="button"
+              class="btn btn--primary btn--sm"
+              [disabled]="busyJobId() === row.job.id"
+              (click)="apply(row.job)"
+            >
+              Candidati
+            </button>
+          }
+          <span class="spacer"></span>
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            [attr.aria-label]="'Modifica ' + row.job.title"
+            (click)="edit(row.job)"
+          >
+            Modifica
+          </button>
+          <button
+            type="button"
+            class="btn btn--danger btn--sm"
+            [attr.aria-label]="'Elimina ' + row.job.title"
+            [disabled]="busyJobId() === row.job.id"
+            (click)="remove(row.job)"
+          >
+            Elimina
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}

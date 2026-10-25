@@ -1,0 +1,125 @@
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.pipeline__step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--status-color, var(--border));
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--status-soft, var(--surface-2));
+    border-color: var(--status-color);
+  }
+}
+
+.pipeline__count {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pipeline__label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.table-wrap {
+  // containing block for the absolutely positioned .sr-only header, so it can't widen the page
+  position: relative;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+}
+
+.table__title {
+  font-weight: 600;
+}
+
+.table__actions {
+  text-align: right;
+}
+
+.status-select {
+  border-left: 4px solid var(--status-color, var(--border));
+}
+
+// phones: one card per application instead of a table that doesn't fit
+@media (max-width: 40rem) {
+  .table {
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    th,
+    td {
+      display: block;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+
+    th,
+    td {
+      padding: 0;
+      border: 0;
+    }
+  }
+
+  .table__title,
+  .table__actions {
+    grid-column: 1 / -1;
+  }
+}

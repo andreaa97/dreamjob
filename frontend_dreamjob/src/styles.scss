@@ -1,1 +1,356 @@
-/* You can add global styles to this file, and also import other style files */
+/* Design tokens and shared building blocks (buttons, fields, cards, alerts, status colors). */
+
+:root {
+  color-scheme: light;
+  --page-width: 72rem;
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --border: #dde1eb;
+  --text: #1b2232;
+  --muted: #5b6477;
+  --primary: #3d5af1;
+  --primary-hover: #2f49d6;
+  --primary-text: #ffffff;
+  --primary-soft: #e8ecff;
+  --danger: #c4302b;
+  --danger-soft: #fdeceb;
+  --success: #23824a;
+  --success-soft: #e5f5eb;
+  --focus: #3d5af1;
+  --shadow: 0 1px 2px rgb(20 28 45 / 6%), 0 2px 8px rgb(20 28 45 / 5%);
+
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #11151f;
+    --surface: #181d29;
+    --surface-2: #222838;
+    --border: #2e3547;
+    --text: #e8ebf3;
+    --muted: #9aa3b8;
+    --primary: #7b91ff;
+    --primary-hover: #94a5ff;
+    --primary-text: #0d1020;
+    --primary-soft: #262f57;
+    --danger: #ff8a80;
+    --danger-soft: #3a2024;
+    --success: #6fd49a;
+    --success-soft: #1b3326;
+    --focus: #94a5ff;
+    --shadow: none;
+  }
+}
+
+/* one color per application status, used by badges, selects and the pipeline */
+[data-status='SAVED'] {
+  --status-color: #7c8597;
+  --status-soft: color-mix(in srgb, #7c8597 14%, var(--surface));
+}
+[data-status='APPLIED'] {
+  --status-color: #3d5af1;
+  --status-soft: color-mix(in srgb, #3d5af1 14%, var(--surface));
+}
+[data-status='INTERVIEW'] {
+  --status-color: #c77700;
+  --status-soft: color-mix(in srgb, #e69100 16%, var(--surface));
+}
+[data-status='OFFER'] {
+  --status-color: #23824a;
+  --status-soft: color-mix(in srgb, #23824a 15%, var(--surface));
+}
+[data-status='REJECTED'] {
+  --status-color: #c4302b;
+  --status-soft: color-mix(in srgb, #c4302b 13%, var(--surface));
+}
+[data-status='WITHDRAWN'] {
+  --status-color: #8a5cc4;
+  --status-soft: color-mix(in srgb, #8a5cc4 14%, var(--surface));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.5vw, 1.9rem);
+  line-height: 1.2;
+}
+
+a {
+  color: var(--primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  p {
+    margin: 0.35rem 0 0;
+  }
+}
+
+.card {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: var(--muted);
+  }
+}
+
+/* buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn--sm {
+  min-height: 2.1rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: var(--primary-text);
+
+  &:hover:not(:disabled) {
+    background: var(--primary-hover);
+  }
+}
+
+.btn--ghost {
+  border-color: var(--border);
+  background: var(--surface);
+
+  &:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+}
+
+.btn--danger {
+  color: var(--danger);
+
+  &:hover:not(:disabled) {
+    background: var(--danger-soft);
+  }
+}
+
+/* form fields */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field__label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field__error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.5rem;
+  align-self: end;
+
+  input {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--primary);
+  }
+}
+
+input:not([type='checkbox']),
+select {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+
+  &[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+/* toolbar with filters */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+
+  .field {
+    flex: 1 1 12rem;
+    max-width: 18rem;
+  }
+}
+
+.toolbar__count {
+  margin-left: auto;
+  padding-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* alerts */
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+
+  > span {
+    flex: 1;
+  }
+}
+
+.alert--error {
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.alert--success {
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.alert__close {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* badges */
+
+.badge,
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--remote {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status {
+  background: var(--status-soft);
+  color: var(--status-color);
+  text-decoration: none;
+}

@@ -1,0 +1,119 @@
+<header class="page-header">
+  <div>
+    <h1>Candidature</h1>
+    <p class="muted">A che punto sei con ogni annuncio. Stato e data si salvano appena li cambi.</p>
+  </div>
+  <a class="btn btn--ghost" routerLink="/annunci">Vai agli annunci</a>
+</header>
+
+@if (message(); as m) {
+  <div
+    class="alert"
+    [class.alert--error]="m.kind === 'error'"
+    [class.alert--success]="m.kind === 'success'"
+    [attr.role]="m.kind === 'error' ? 'alert' : 'status'"
+  >
+    <span>{{ m.text }}</span>
+    <button
+      type="button"
+      class="alert__close"
+      aria-label="Chiudi messaggio"
+      (click)="message.set(null)"
+    >
+      ×
+    </button>
+  </div>
+}
+
+<div class="pipeline" role="group" aria-label="Filtra per stato">
+  @for (status of statuses; track status) {
+    <button
+      type="button"
+      class="pipeline__step"
+      [attr.data-status]="status"
+      [attr.aria-pressed]="statusFilter() === status"
+      (click)="toggleFilter(status)"
+    >
+      <span class="pipeline__count">{{ counts()[status] }}</span>
+      <span class="pipeline__label">{{ labels[status] }}</span>
+    </button>
+  }
+</div>
+
+@if (loadError(); as error) {
+  <div class="alert alert--error" role="alert">
+    <span>{{ error }}</span>
+    <button type="button" class="btn btn--ghost btn--sm" (click)="applications.reload()">
+      Riprova
+    </button>
+  </div>
+} @else if (applications.isLoading() && total() === 0) {
+  <p class="muted" role="status">Caricamento candidature…</p>
+} @else if (total() === 0) {
+  <div class="card empty">
+    <p>Nessuna candidatura per ora.</p>
+    <a class="btn btn--primary" routerLink="/annunci">Candidati a un annuncio</a>
+  </div>
+} @else if (visible().length === 0) {
+  <div class="card empty">
+    <p>Nessuna candidatura con stato "{{ labels[statusFilter()!] }}".</p>
+    <button type="button" class="btn btn--ghost" (click)="statusFilter.set(null)">
+      Mostra tutte
+    </button>
+  </div>
+} @else {
+  <div class="card table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Annuncio</th>
+          <th scope="col">Stato</th>
+          <th scope="col">Data candidatura</th>
+          <th scope="col"><span class="sr-only">Azioni</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of visible(); track a.id) {
+          <tr>
+            <th scope="row" class="table__title">{{ a.jobTitle }}</th>
+            <td>
+              <select
+                #status
+                class="status-select"
+                [attr.data-status]="a.status"
+                [attr.aria-label]="'Stato della candidatura per ' + a.jobTitle"
+                [disabled]="busyId() === a.id"
+                (change)="changeStatus(a, status)"
+              >
+                @for (s of statuses; track s) {
+                  <option [value]="s" [selected]="s === a.status">{{ labels[s] }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <input
+                #date
+                type="date"
+                [value]="a.appliedAt ?? ''"
+                [attr.aria-label]="'Data della candidatura per ' + a.jobTitle"
+                [disabled]="busyId() === a.id"
+                (change)="changeDate(a, date)"
+              />
+            </td>
+            <td class="table__actions">
+              <button
+                type="button"
+                class="btn btn--danger btn--sm"
+                [attr.aria-label]="'Elimina la candidatura per ' + a.jobTitle"
+                [disabled]="busyId() === a.id"
+                (click)="remove(a)"
+              >
+                Elimina
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

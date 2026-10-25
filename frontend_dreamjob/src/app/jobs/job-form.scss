@@ -1,0 +1,23 @@
+.job-form {
+  margin-bottom: 1.5rem;
+  border-color: var(--primary);
+}
+
+.job-form__title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+}
+
+.job-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: start;
+}
+
+.job-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}

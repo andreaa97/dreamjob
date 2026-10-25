@@ -1,0 +1,46 @@
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.job {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.job__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.job__title {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.job__company,
+.job__salary {
+  margin: 0;
+}
+
+.job__salary {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.job__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+}

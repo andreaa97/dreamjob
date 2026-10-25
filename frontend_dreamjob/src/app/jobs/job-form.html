@@ -1,0 +1,77 @@
+<form class="card job-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2 class="job-form__title">{{ job() ? 'Modifica annuncio' : 'Nuovo annuncio' }}</h2>
+
+  <div class="job-form__grid">
+    <label class="field">
+      <span class="field__label">Ruolo *</span>
+      <input
+        formControlName="title"
+        autocomplete="off"
+        placeholder="es. Backend Java Developer"
+        [attr.aria-invalid]="showError('title') || null"
+      />
+      @if (showError('title')) {
+        <span class="field__error">Inserisci il ruolo.</span>
+      }
+    </label>
+
+    <label class="field">
+      <span class="field__label">Azienda *</span>
+      <input
+        formControlName="company"
+        autocomplete="organization"
+        [attr.aria-invalid]="showError('company') || null"
+      />
+      @if (showError('company')) {
+        <span class="field__error">Inserisci l'azienda.</span>
+      }
+    </label>
+
+    <label class="field">
+      <span class="field__label">Sede</span>
+      <input formControlName="location" placeholder="es. Remote, Milano" />
+    </label>
+
+    <label class="field field--checkbox">
+      <input type="checkbox" formControlName="remoteFromItaly" />
+      <span>Lavorabile in remoto dall'Italia</span>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Stipendio minimo (€/anno)</span>
+      <input
+        type="number"
+        min="0"
+        step="1000"
+        formControlName="salaryMin"
+        [attr.aria-invalid]="showError('salaryMin') || showSalaryRangeError() || null"
+      />
+      @if (showError('salaryMin')) {
+        <span class="field__error">Lo stipendio non può essere negativo.</span>
+      }
+    </label>
+
+    <label class="field">
+      <span class="field__label">Stipendio massimo (€/anno)</span>
+      <input
+        type="number"
+        min="0"
+        step="1000"
+        formControlName="salaryMax"
+        [attr.aria-invalid]="showError('salaryMax') || showSalaryRangeError() || null"
+      />
+      @if (showError('salaryMax')) {
+        <span class="field__error">Lo stipendio non può essere negativo.</span>
+      } @else if (showSalaryRangeError()) {
+        <span class="field__error">Il massimo deve essere maggiore o uguale al minimo.</span>
+      }
+    </label>
+  </div>
+
+  <div class="job-form__actions">
+    <button type="button" class="btn btn--ghost" (click)="cancelled.emit()">Annulla</button>
+    <button type="submit" class="btn btn--primary" [disabled]="saving()">
+      {{ saving() ? 'Salvataggio…' : job() ? 'Salva modifiche' : 'Crea annuncio' }}
+    </button>
+  </div>
+</form>
